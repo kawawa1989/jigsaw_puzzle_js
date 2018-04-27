@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Start with pixi.js</title>
+</head>
+
+<body>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.4.3/pixi.min.js"></script>
+	<script type="text/javascript">
+		var type = "WebGL";
+		if (!PIXI.utils.isWebGLSupported()) {
+			type = "canvas"
+		}
+		PIXI.utils.sayHello(type);
+
+		// 新しいレンダラー作る
+		var renderer = PIXI.autoDetectRenderer(1000, 1000, { antialias: true, backgroundColor: 0x00FFD4 });
+
+		// それをHTMLファイルに入れる
+		document.body.appendChild(renderer.view);
+
+		// stageという名前の容器（オプジェクト）を作る
+		var scene = new PIXI.Container();
+
+
+		// テクスチャ読み込み
+		PIXI.loader
+			.add("images/04.png")
+			.add("images/picture.jpg")
+			.add("images/piece1.png")
+			.load(setup);
+		var c = null;
+		var draggingObject = null;
+		var eventData = null;
+
+		function setup() {
+			var pieceDataList = [];
+			for (var y = 0; y < 6; ++y) {
+				var row = [];
+				for (var x = 0; x < 10; ++x) {
+					row.push({ top: 0, right: 0, bottom: 0, left: 0 });
+				}
+				pieceDataList.push(row);
+			}
+
+
+			for (var y = 0; y < pieceDataList.length; ++y) {
+				var row = pieceDataList[y];
+				for (var x = 0; x < row.length; ++x) {
+					var piece = row[x];
+					piece.right = 1;
+					piece.bottom = 1;
+					if (x + 1 < row.length) {
+						row[x + 1].left = -piece.right;
+					}
+					if (y + 1 < pieceDataList.length) {
+						pieceDataList[y + 1][x].top = -piece.bottom;
+					}
+
+
+					if (x == row.length - 1) {
+						piece.right = 0;
+					}
+					if (x == 0) {
+						piece.left = 0;
+					}
+					if (y == 0) {
+						piece.top = 0;
+					}
+					if (y == pieceDataList.length - 1) {
+						piece.bottom = 0;
+					}
+					scene.addChild(createPieceContainer(x * 100, y * 100, x, y, piece.top, piece.right, piece.bottom, piece.left));
+				}
+			}
+			console.log("setup!!");
+		}
+
+
+		function createPieceContainer(x, y, column, row, top, right, bottom, left) {
+			var container = new PIXI.Container();
+			var graphics = createPieceMask(1, top, right, bottom, left, 100);
+			// スプライト生成
+			var texture = PIXI.Texture.fromImage("images/picture.jpg");
+			var sprite = new PIXI.Sprite(texture);
+			graphics.position.y -= 24;
+
+			container.interactive = true;
+			container.width = 100;
+			container.addChild(sprite);
+			container.addChild(graphics);
+
+			sprite.mask = graphics;
+			container.position.x = x;
+			container.position.y = y;
+			sprite.width = 1000;
+			sprite.height = 600;
+			sprite.position.x = -1 * column * 100;
+			sprite.position.y = -1 * row * 100;
+
+			// ドラッグを開始
+			container.on('mousedown', onDragStart)
+			container.on('touchstart', onDragStart)
+			// ドロップ（ドラッグを終了）
+			container.on('mouseup', onDragEnd)
+			container.on('mouseupoutside', onDragEnd)
+			container.on('touchend', onDragEnd)
+			container.on('touchendoutside', onDragEnd)
+			// ドラッグ中
+			container.on('mousemove', onDragMove)
+			container.on('touchmove', onDragMove)
+			return container;
+		}
+
+
+		function onDragStart(event) {
+			if (draggingObject) {
+				return;
+			}
+			draggingObject = this;
+			var pos = event.data.getLocalPosition(this.parent);
+			this.distance = { x: 0, y: 0 };
+			this.distance.x = this.position.x - pos.x;
+			this.distance.y = this.position.y - pos.y;
+
+			// store a reference to the data
+			// the reason for this is because of multitouch
+			// we want to track the movement of this particular touch
+			this.data = event.data;
+			this.alpha = 0.5;
+			this.dragging = true;
+		}
+
+		function onDragEnd() {
+			this.alpha = 1;
+			this.dragging = false;
+			// set the interaction data to null
+			this.data = null;
+			draggingObject = null;
+		}
+
+		function onDragMove() {
+			if (this.dragging) {
+				var newPosition = this.data.getLocalPosition(this.parent);
+				this.position.x = this.distance.x + newPosition.x;
+				this.position.y = this.distance.y + newPosition.y;
+			}
+		}
+
+
+
+
+		function createPieceMask(tileRatio, topTab, rightTab, bottomTab, leftTab, tileWidth) {
+			var mask = new PIXI.Graphics();
+			mask.beginFill(0x000000);
+			var curvyCoords = [
+				0, 0, 35, 15, 37, 5,
+				37, 5, 40, 0, 38, -5,
+				38, -5, 20, -20, 50, -20,
+				50, -20, 80, -20, 62, -5,
+				62, -5, 60, 0, 63, 5,
+				63, 5, 65, 15, 100, 0
+			];
+			var topLeftEdge = { x: 0, y: 24 };
+			mask.moveTo(topLeftEdge.x, topLeftEdge.y);
+
+			//Top
+			for (var i = 0; i < curvyCoords.length / 6; i++) {
+				var p1 = { x: topLeftEdge.x + (curvyCoords[i * 6 + 0] * tileRatio), y: topLeftEdge.y + (topTab * curvyCoords[i * 6 + 1] * tileRatio) };
+				var p2 = { x: topLeftEdge.x + (curvyCoords[i * 6 + 2] * tileRatio), y: topLeftEdge.y + (topTab * curvyCoords[i * 6 + 3] * tileRatio) };
+				var p3 = { x: topLeftEdge.x + (curvyCoords[i * 6 + 4] * tileRatio), y: topLeftEdge.y + (topTab * curvyCoords[i * 6 + 5] * tileRatio) };
+				mask.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+			}
+			//Right
+			var topRightEdge = { x: topLeftEdge.x + tileWidth, y: topLeftEdge.y + 0 };
+			for (var i = 0; i < curvyCoords.length / 6; i++) {
+				var p1 = { x: topRightEdge.x + (-rightTab * curvyCoords[i * 6 + 1] * tileRatio), y: topRightEdge.y + (curvyCoords[i * 6 + 0] * tileRatio) };
+				var p2 = { x: topRightEdge.x + (-rightTab * curvyCoords[i * 6 + 3] * tileRatio), y: topRightEdge.y + (curvyCoords[i * 6 + 2] * tileRatio) };
+				var p3 = { x: topRightEdge.x + (-rightTab * curvyCoords[i * 6 + 5] * tileRatio), y: topRightEdge.y + (curvyCoords[i * 6 + 4] * tileRatio) };
+				mask.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+			}
+			//Bottom
+			var bottomRightEdge = { x: topRightEdge.x + 0, y: topRightEdge.y + tileWidth };
+			for (var i = 0; i < curvyCoords.length / 6; i++) {
+				var p1 = { x: bottomRightEdge.x - (curvyCoords[i * 6 + 0] * tileRatio), y: bottomRightEdge.y - (bottomTab * curvyCoords[i * 6 + 1] * tileRatio) };
+				var p2 = { x: bottomRightEdge.x - (curvyCoords[i * 6 + 2] * tileRatio), y: bottomRightEdge.y - (bottomTab * curvyCoords[i * 6 + 3] * tileRatio) };
+				var p3 = { x: bottomRightEdge.x - (curvyCoords[i * 6 + 4] * tileRatio), y: bottomRightEdge.y - (bottomTab * curvyCoords[i * 6 + 5] * tileRatio) };
+				mask.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+			}
+			//Left
+			var bottomLeftEdge = { x: bottomRightEdge.x - tileWidth, y: bottomRightEdge.y - 0 };
+			for (var i = 0; i < curvyCoords.length / 6; i++) {
+				var p1 = { x: bottomLeftEdge.x - (-leftTab * curvyCoords[i * 6 + 1] * tileRatio), y: bottomLeftEdge.y - (curvyCoords[i * 6 + 0] * tileRatio) };
+				var p2 = { x: bottomLeftEdge.x - (-leftTab * curvyCoords[i * 6 + 3] * tileRatio), y: bottomLeftEdge.y - (curvyCoords[i * 6 + 2] * tileRatio) };
+				var p3 = { x: bottomLeftEdge.x - (-leftTab * curvyCoords[i * 6 + 5] * tileRatio), y: bottomLeftEdge.y - (curvyCoords[i * 6 + 4] * tileRatio) };
+				mask.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+			}
+			mask.endFill();
+			return mask;
+		}
+
+		/*
+		graphics.bezierCurveTo(75,37,70,25,50,25);
+		graphics.bezierCurveTo(20,25,20,62.5,20,62.5);
+		graphics.bezierCurveTo(20,80,40,102,75,120);
+		graphics.bezierCurveTo(110,102,130,80,130,62.5);
+		graphics.bezierCurveTo(130,62.5,130,25,100,25);
+		graphics.bezierCurveTo(85,25,75,37,75,40);
+		*/
+		function update() {
+		}
+
+		/**
+		 * animation関数を定義
+		 */
+		var animation = function () {
+			// 再帰的に次のアニメーションフレームで animation関数を呼び出す
+			requestAnimationFrame(animation);
+			update();
+
+			// 描画
+			renderer.render(scene);
+		};
+		animation();
+
+	</script>
+</body>
+
+</html>
