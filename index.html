@@ -86,8 +86,11 @@
 			// スプライト生成
 			var texture = PIXI.Texture.fromImage("images/picture.jpg");
 			var sprite = new PIXI.Sprite(texture);
+			graphics.position.x += 24;
 			graphics.position.y -= 24;
+			shadow.position.x += 24;
 			shadow.position.y -= 24;
+			shadow.anchor = 0.5;
 			shadow.scale.set(1.1, 1.1);
 
 			container.interactive = true;
@@ -159,7 +162,7 @@
 
 		function createPieceMask(tileRatio, topTab, rightTab, bottomTab, leftTab, tileWidth) {
 			var mask = new PIXI.Graphics();
-			mask.beginFill(0xDDDDDD);
+			mask.beginFill(0x808080);
 			var curvyCoords = [
 				0, 0, 35, 15, 37, 5,
 				37, 5, 40, 0, 38, -5,
@@ -168,7 +171,7 @@
 				62, -5, 60, 0, 63, 5,
 				63, 5, 65, 15, 100, 0
 			];
-			var topLeftEdge = { x: 0, y: 24 };
+			var topLeftEdge = { x: -24, y: 24 };
 			mask.moveTo(topLeftEdge.x, topLeftEdge.y);
 
 			//Top
