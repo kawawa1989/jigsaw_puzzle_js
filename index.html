@@ -82,11 +82,13 @@
 		function createPieceContainer(x, y, column, row, top, right, bottom, left) {
 			var container = new PIXI.Container();
 			var graphics = createPieceMask(1, top, right, bottom, left, 100);
-			var shadow = createPieceMask(1, top, right, bottom, left, 101);
+			var shadow = createPieceMask(1, top, right, bottom, left, 100);
 			// スプライト生成
 			var texture = PIXI.Texture.fromImage("images/picture.jpg");
 			var sprite = new PIXI.Sprite(texture);
 			graphics.position.y -= 24;
+			shadow.position.y -= 24;
+			shadow.scale.set(1.1, 1.1);
 
 			container.interactive = true;
 			container.width = 100;
