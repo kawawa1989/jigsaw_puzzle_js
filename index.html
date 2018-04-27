@@ -81,7 +81,7 @@
 
 		function createPieceContainer(x, y, column, row, top, right, bottom, left) {
 			var container = new PIXI.Container();
-			var graphics = createPieceMask(1.1, top, right, bottom, left, 100);
+			var graphics = createPieceMask(0.9, top, right, bottom, left, 100);
 			// スプライト生成
 			var texture = PIXI.Texture.fromImage("images/picture.jpg");
 			var sprite = new PIXI.Sprite(texture);
