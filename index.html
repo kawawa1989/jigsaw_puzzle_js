@@ -36,25 +36,34 @@
 			.load(setup);
 		var draggingObject = null;
 		var pictureTexture = null;
+		var pieceFrame = [];
+		var pieces = [];
+		var pieceContainer = null;
+		var frameContainer = null;
+		var pieceXNum = 3;
+		var pieceYNum = 3;
 
 		function setup() {
 			pictureTexture = PIXI.Texture.fromImage("images/picture01.png");
 			var pieceDataList = [];
-			for (var y = 0; y < 3; ++y) {
+			for (var y = 0; y < pieceYNum; ++y) {
 				var row = [];
-				for (var x = 0; x < 3; ++x) {
+				for (var x = 0; x < pieceXNum; ++x) {
 					row.push({ top: 0, right: 0, bottom: 0, left: 0 });
 				}
 				pieceDataList.push(row);
 			}
-
+			pieceContainer = new PIXI.Container();
+			frameContainer = new PIXI.Container();
+			scene.addChild(frameContainer);
+			scene.addChild(pieceContainer);
 
 			for (var y = 0; y < pieceDataList.length; ++y) {
 				var row = pieceDataList[y];
 				for (var x = 0; x < row.length; ++x) {
 					var piece = row[x];
-					piece.right = 1;
-					piece.bottom = 1;
+					piece.right = Math.pow(-1, Math.floor(Math.random() * 2));
+					piece.bottom = Math.pow(-1, Math.floor(Math.random() * 2));
 					if (x + 1 < row.length) {
 						row[x + 1].left = -piece.right;
 					}
@@ -78,7 +87,10 @@
 
 					var posX = Math.random() * 250;
 					var posY = 300 + (Math.random() * 200);
-					scene.addChild(createPieceContainer(posX, posY, x, y, piece.top, piece.right, piece.bottom, piece.left));
+					var c = createPieceContainer(posX, posY, x, y, piece.top, piece.right, piece.bottom, piece.left);
+					pieces.push(c);
+					scene.addChild(c);
+					pieceContainer.addChild(c);
 				}
 			}
 
@@ -89,9 +101,8 @@
 					var obj = createPieceMask(1, piece.top, piece.right, piece.bottom, piece.left, 100, false);
 					obj.position.x = x * 100;
 					obj.position.y = y * 100;
-					obj.position.x += 24;
-					obj.position.y -= 24;
-					scene.addChild(obj);
+					frameContainer.addChild(obj);
+					pieceFrame.push(obj);
 				}
 			}
 			console.log("setup!!");
@@ -99,24 +110,25 @@
 
 
 		function createPieceContainer(x, y, column, row, top, right, bottom, left) {
+			var contentWidth = pictureTexture.width / pieceXNum;
 			var container = new PIXI.Container();
-			var graphics = createPieceMask(1, top, right, bottom, left, 100, true);
+			var graphics = createPieceMask(1, top, right, bottom, left, contentWidth, true);
+			var edge = createPieceMask(1, top, right, bottom, left, contentWidth, false);
 			// スプライト生成
 			var sprite = new PIXI.Sprite(pictureTexture);
-			graphics.position.x += 24;
-			graphics.position.y -= 24;
 			container.interactive = true;
-			container.width = 100;
+			container.width = contentWidth;
 			container.addChild(sprite);
 			container.addChild(graphics);
+			container.addChild(edge);
 
 			sprite.mask = graphics;
 			container.position.x = x;
 			container.position.y = y;
-			sprite.width = 300;
-			sprite.height = 300;
-			sprite.position.x = -1 * column * 100;
-			sprite.position.y = -1 * row * 100;
+			sprite.width = pictureTexture.width;
+			sprite.height = pictureTexture.height;
+			sprite.position.x = -1 * column * contentWidth;
+			sprite.position.y = -1 * row * contentWidth;
 
 
 			// ドラッグを開始
@@ -130,6 +142,8 @@
 			// ドラッグ中
 			container.on('mousemove', onDragMove)
 			container.on('touchmove', onDragMove)
+			container.pieceNumber = column + (row * 3);
+			container.set = false;
 			return container;
 		}
 
@@ -138,6 +152,13 @@
 			if (draggingObject) {
 				return;
 			}
+			if (this.set) {
+				return;
+			}
+			pieceContainer.removeChild(this);
+			pieceContainer.addChild(this);
+
+			console.log("pieceNumber:" + this.pieceNumber);
 			draggingObject = this;
 			var pos = event.data.getLocalPosition(this.parent);
 			this.distance = { x: 0, y: 0 };
@@ -158,6 +179,59 @@
 			// set the interaction data to null
 			this.data = null;
 			draggingObject = null;
+			hitCheck(this);
+			checkClear();
+		}
+
+		function checkClear() {
+			for (var i = 0; i < pieces.length; ++i) {
+				if (!pieces[i].set) {
+					return false;
+				}
+			}
+			window.alert("Game Clear!!");
+		}
+
+		function hitCheck(content) {
+			var isHit = function (a, b) {
+				// 当たり判定
+				if (Math.abs(a.x - b.x) < (a.width / 2) + (b.width / 2) && Math.abs(a.y - b.y) < (a.height / 2) + (b.height / 2)) {
+					return true;
+				}
+				return false;
+			};
+
+			var aw = content.width / 8;
+			var ah = content.height / 8;
+			var arect = {
+				x: content.position.x + (content.width / 2),
+				y: content.position.y + (content.height / 2),
+				width: aw,
+				height: ah
+			};
+			var brect = {
+				x: 0,
+				y: 0,
+				width: 0,
+				height: 0,
+			};
+
+			for (var i = 0; i < pieceFrame.length; ++i) {
+				var bw = pieceFrame[i].width / 8;
+				var bh = pieceFrame[i].height / 8;
+
+				brect.x = pieceFrame[i].position.x + (pieceFrame[i].width / 2);
+				brect.y = pieceFrame[i].position.y + (pieceFrame[i].height / 2);
+				brect.width = bw;
+				brect.height = bh;
+				if (isHit(arect, brect)) {
+					if (content.pieceNumber == i) {
+						content.set = true;
+						content.position.x = pieceFrame[i].position.x;
+						content.position.y = pieceFrame[i].position.y;
+					}
+				}
+			}
 		}
 
 		function onDragMove() {
@@ -187,7 +261,7 @@
 				62, -5, 60, 0, 63, 5,
 				63, 5, 65, 15, 100, 0
 			];
-			var topLeftEdge = { x: -24, y: 24 };
+			var topLeftEdge = { x: 0, y: 0 };
 			mask.moveTo(topLeftEdge.x, topLeftEdge.y);
 
 			//Top
