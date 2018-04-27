@@ -92,7 +92,7 @@
 			container.addChild(sprite);
 			container.addChild(graphics);
 
-			sprite.mask = graphics;
+			//xsprite.mask = graphics;
 			container.position.x = x;
 			container.position.y = y;
 			sprite.width = 1000;
@@ -155,6 +155,7 @@
 		function createPieceMask(tileRatio, topTab, rightTab, bottomTab, leftTab, tileWidth) {
 			var mask = new PIXI.Graphics();
 			mask.beginFill(0x000000);
+			mask.lineStyle(3, 0xffd900, 1);
 			var curvyCoords = [
 				0, 0, 35, 15, 37, 5,
 				37, 5, 40, 0, 38, -5,
