@@ -16,7 +16,7 @@
 		PIXI.utils.sayHello(type);
 
 		// 新しいレンダラー作る
-		var renderer = PIXI.autoDetectRenderer(1000, 1000, { antialias: true, backgroundColor: 0x000000 });
+		var renderer = PIXI.autoDetectRenderer(1000, 1000, { antialias: true, backgroundColor: 0xFFFFFF });
 
 		// それをHTMLファイルに入れる
 		document.body.appendChild(renderer.view);
@@ -72,7 +72,20 @@
 					if (y == pieceDataList.length - 1) {
 						piece.bottom = 0;
 					}
-					scene.addChild(createPieceContainer(x * 101, y * 101, x, y, piece.top, piece.right, piece.bottom, piece.left));
+					scene.addChild(createPieceContainer(x * 100, y * 100, x, y, piece.top, piece.right, piece.bottom, piece.left));
+				}
+			}
+
+			for (var y = 0; y < pieceDataList.length; ++y) {
+				var row = pieceDataList[y];
+				for (var x = 0; x < row.length; ++x) {
+					var piece = row[x];
+					var obj = createPieceMask(1, piece.top, piece.right, piece.bottom, piece.left, 100, false);
+					obj.position.x = x * 100;
+					obj.position.y = y * 100;
+					obj.position.x += 24;
+					obj.position.y -= 24;
+					scene.addChild(obj);
 				}
 			}
 			console.log("setup!!");
@@ -81,21 +94,14 @@
 
 		function createPieceContainer(x, y, column, row, top, right, bottom, left) {
 			var container = new PIXI.Container();
-			var graphics = createPieceMask(1, top, right, bottom, left, 100);
-			var shadow = createPieceMask(1, top, right, bottom, left, 100);
+			var graphics = createPieceMask(1, top, right, bottom, left, 100, true);
 			// スプライト生成
 			var texture = PIXI.Texture.fromImage("images/picture.jpg");
 			var sprite = new PIXI.Sprite(texture);
 			graphics.position.x += 24;
 			graphics.position.y -= 24;
-
-			shadow.position.x += 20;
-			shadow.position.y -= 28;
-			shadow.scale.set(1.05, 1.05);
-
 			container.interactive = true;
 			container.width = 100;
-			container.addChild(shadow);
 			container.addChild(sprite);
 			container.addChild(graphics);
 
@@ -160,9 +166,14 @@
 
 
 
-		function createPieceMask(tileRatio, topTab, rightTab, bottomTab, leftTab, tileWidth) {
+		function createPieceMask(tileRatio, topTab, rightTab, bottomTab, leftTab, tileWidth, fill) {
 			var mask = new PIXI.Graphics();
-			mask.beginFill(0x494949);
+			if (fill) {
+				mask.beginFill(0x494949);
+			}
+			else{
+				mask.lineStyle(2, 0x0000FF, 1);
+			}
 			var curvyCoords = [
 				0, 0, 35, 15, 37, 5,
 				37, 5, 40, 0, 38, -5,
@@ -205,7 +216,9 @@
 				var p3 = { x: bottomLeftEdge.x - (-leftTab * curvyCoords[i * 6 + 5] * tileRatio), y: bottomLeftEdge.y - (curvyCoords[i * 6 + 4] * tileRatio) };
 				mask.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
 			}
-			mask.endFill();
+			if (fill) {
+				mask.endFill();
+			}
 			return mask;
 		}
 
