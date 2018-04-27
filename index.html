@@ -16,7 +16,10 @@
 		PIXI.utils.sayHello(type);
 
 		// 新しいレンダラー作る
-		var renderer = PIXI.autoDetectRenderer(1000, 1000, { antialias: true, backgroundColor: 0xFFFFFF });
+		// 720 * 1280
+		var renderer = PIXI.autoDetectRenderer(360, 640, { antialias: true, backgroundColor: 0xDDDDDD });
+		renderer.view.style.width = '720px';
+		renderer.view.style.height = '1280px';
 
 		// それをHTMLファイルに入れる
 		document.body.appendChild(renderer.view);
@@ -25,21 +28,21 @@
 		var scene = new PIXI.Container();
 
 
+
+
 		// テクスチャ読み込み
 		PIXI.loader
-			.add("images/04.png")
-			.add("images/picture.jpg")
-			.add("images/piece1.png")
+			.add("images/picture01.png")
 			.load(setup);
-		var c = null;
 		var draggingObject = null;
-		var eventData = null;
+		var pictureTexture = null;
 
 		function setup() {
+			pictureTexture = PIXI.Texture.fromImage("images/picture01.png");
 			var pieceDataList = [];
-			for (var y = 0; y < 6; ++y) {
+			for (var y = 0; y < 3; ++y) {
 				var row = [];
-				for (var x = 0; x < 10; ++x) {
+				for (var x = 0; x < 3; ++x) {
 					row.push({ top: 0, right: 0, bottom: 0, left: 0 });
 				}
 				pieceDataList.push(row);
@@ -72,7 +75,10 @@
 					if (y == pieceDataList.length - 1) {
 						piece.bottom = 0;
 					}
-					scene.addChild(createPieceContainer(x * 100, y * 100, x, y, piece.top, piece.right, piece.bottom, piece.left));
+
+					var posX = Math.random() * 250;
+					var posY = 300 + (Math.random() * 200);
+					scene.addChild(createPieceContainer(posX, posY, x, y, piece.top, piece.right, piece.bottom, piece.left));
 				}
 			}
 
@@ -96,8 +102,7 @@
 			var container = new PIXI.Container();
 			var graphics = createPieceMask(1, top, right, bottom, left, 100, true);
 			// スプライト生成
-			var texture = PIXI.Texture.fromImage("images/picture.jpg");
-			var sprite = new PIXI.Sprite(texture);
+			var sprite = new PIXI.Sprite(pictureTexture);
 			graphics.position.x += 24;
 			graphics.position.y -= 24;
 			container.interactive = true;
@@ -108,8 +113,8 @@
 			sprite.mask = graphics;
 			container.position.x = x;
 			container.position.y = y;
-			sprite.width = 1000;
-			sprite.height = 600;
+			sprite.width = 300;
+			sprite.height = 300;
 			sprite.position.x = -1 * column * 100;
 			sprite.position.y = -1 * row * 100;
 
@@ -171,7 +176,7 @@
 			if (fill) {
 				mask.beginFill(0x494949);
 			}
-			else{
+			else {
 				mask.lineStyle(2, 0x0000FF, 1);
 			}
 			var curvyCoords = [
