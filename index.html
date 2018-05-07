@@ -8,7 +8,9 @@
 
 <body>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.4.3/pixi.min.js"></script>
+	<script src="js/title_scene.js"></script>
 	<script type="text/javascript">
+		var title = new Title();
 		var type = "WebGL";
 		if (!PIXI.utils.isWebGLSupported()) {
 			type = "canvas"
@@ -18,8 +20,10 @@
 		// 新しいレンダラー作る
 		// 720 * 1280
 		var renderer = PIXI.autoDetectRenderer(360, 640, { antialias: true, backgroundColor: 0xDDDDDD });
-		renderer.view.style.width = '720px';
-		renderer.view.style.height = '1280px';
+		var h = window.innerHeight / 640;
+		console.log("height:" + window.height + "," + window.innerHeight);
+		renderer.view.style.width = (360 * h) + 'px';
+		renderer.view.style.height = (640 * h) + 'px';
 
 		// それをHTMLファイルに入れる
 		document.body.appendChild(renderer.view);
@@ -40,8 +44,8 @@
 		var pieces = [];
 		var pieceContainer = null;
 		var frameContainer = null;
-		var pieceXNum = 3;
-		var pieceYNum = 3;
+		var pieceXNum = 7;
+		var pieceYNum = 7;
 
 		function setup() {
 			pictureTexture = PIXI.Texture.fromImage("images/picture01.png");
@@ -98,9 +102,10 @@
 				var row = pieceDataList[y];
 				for (var x = 0; x < row.length; ++x) {
 					var piece = row[x];
-					var obj = createPieceMask(1, piece.top, piece.right, piece.bottom, piece.left, 100, false);
-					obj.position.x = x * 100;
-					obj.position.y = y * 100;
+					var contentWidth = pictureTexture.width / pieceXNum;
+					var obj = createPieceMask(piece.top, piece.right, piece.bottom, piece.left, contentWidth, false);
+					obj.position.x = x * contentWidth;
+					obj.position.y = y * contentWidth;
 					frameContainer.addChild(obj);
 					pieceFrame.push(obj);
 				}
@@ -112,8 +117,8 @@
 		function createPieceContainer(x, y, column, row, top, right, bottom, left) {
 			var contentWidth = pictureTexture.width / pieceXNum;
 			var container = new PIXI.Container();
-			var graphics = createPieceMask(1, top, right, bottom, left, contentWidth, true);
-			var edge = createPieceMask(1, top, right, bottom, left, contentWidth, false);
+			var graphics = createPieceMask(top, right, bottom, left, contentWidth, true);
+			var edge = createPieceMask(top, right, bottom, left, contentWidth, false);
 			// スプライト生成
 			var sprite = new PIXI.Sprite(pictureTexture);
 			container.interactive = true;
@@ -142,9 +147,9 @@
 			// ドラッグ中
 			container.on('mousemove', onDragMove)
 			container.on('touchmove', onDragMove)
-			container.pieceNumber = column + (row * 3);
+			container.pieceNumber = column + (row * pieceXNum);
 			container.set = false;
-			return container;
+			return containerd
 		}
 
 
@@ -245,13 +250,15 @@
 
 
 
-		function createPieceMask(tileRatio, topTab, rightTab, bottomTab, leftTab, tileWidth, fill) {
+		function createPieceMask(topTab, rightTab, bottomTab, leftTab, tileWidth, fill) {
+			var tileDefault = 100;
+			var tileRatio = tileWidth / tileDefault;
 			var mask = new PIXI.Graphics();
 			if (fill) {
 				mask.beginFill(0x494949);
 			}
 			else {
-				mask.lineStyle(2, 0x0000FF, 1);
+				mask.lineStyle(2, 0x000000, 1);
 			}
 			var curvyCoords = [
 				0, 0, 35, 15, 37, 5,
@@ -261,38 +268,41 @@
 				62, -5, 60, 0, 63, 5,
 				63, 5, 65, 15, 100, 0
 			];
+			for (var i = 0; i < curvyCoords.length; ++i) {
+				curvyCoords[i] *= tileRatio;
+			}
 			var topLeftEdge = { x: 0, y: 0 };
 			mask.moveTo(topLeftEdge.x, topLeftEdge.y);
 
 			//Top
 			for (var i = 0; i < curvyCoords.length / 6; i++) {
-				var p1 = { x: topLeftEdge.x + (curvyCoords[i * 6 + 0] * tileRatio), y: topLeftEdge.y + (topTab * curvyCoords[i * 6 + 1] * tileRatio) };
-				var p2 = { x: topLeftEdge.x + (curvyCoords[i * 6 + 2] * tileRatio), y: topLeftEdge.y + (topTab * curvyCoords[i * 6 + 3] * tileRatio) };
-				var p3 = { x: topLeftEdge.x + (curvyCoords[i * 6 + 4] * tileRatio), y: topLeftEdge.y + (topTab * curvyCoords[i * 6 + 5] * tileRatio) };
+				var p1 = { x: topLeftEdge.x + (curvyCoords[i * 6 + 0]), y: topLeftEdge.y + (topTab * curvyCoords[i * 6 + 1]) };
+				var p2 = { x: topLeftEdge.x + (curvyCoords[i * 6 + 2]), y: topLeftEdge.y + (topTab * curvyCoords[i * 6 + 3]) };
+				var p3 = { x: topLeftEdge.x + (curvyCoords[i * 6 + 4]), y: topLeftEdge.y + (topTab * curvyCoords[i * 6 + 5]) };
 				mask.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
 			}
 			//Right
 			var topRightEdge = { x: topLeftEdge.x + tileWidth, y: topLeftEdge.y + 0 };
 			for (var i = 0; i < curvyCoords.length / 6; i++) {
-				var p1 = { x: topRightEdge.x + (-rightTab * curvyCoords[i * 6 + 1] * tileRatio), y: topRightEdge.y + (curvyCoords[i * 6 + 0] * tileRatio) };
-				var p2 = { x: topRightEdge.x + (-rightTab * curvyCoords[i * 6 + 3] * tileRatio), y: topRightEdge.y + (curvyCoords[i * 6 + 2] * tileRatio) };
-				var p3 = { x: topRightEdge.x + (-rightTab * curvyCoords[i * 6 + 5] * tileRatio), y: topRightEdge.y + (curvyCoords[i * 6 + 4] * tileRatio) };
+				var p1 = { x: topRightEdge.x + (-rightTab * curvyCoords[i * 6 + 1]), y: topRightEdge.y + (curvyCoords[i * 6 + 0]) };
+				var p2 = { x: topRightEdge.x + (-rightTab * curvyCoords[i * 6 + 3]), y: topRightEdge.y + (curvyCoords[i * 6 + 2]) };
+				var p3 = { x: topRightEdge.x + (-rightTab * curvyCoords[i * 6 + 5]), y: topRightEdge.y + (curvyCoords[i * 6 + 4]) };
 				mask.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
 			}
 			//Bottom
 			var bottomRightEdge = { x: topRightEdge.x + 0, y: topRightEdge.y + tileWidth };
 			for (var i = 0; i < curvyCoords.length / 6; i++) {
-				var p1 = { x: bottomRightEdge.x - (curvyCoords[i * 6 + 0] * tileRatio), y: bottomRightEdge.y - (bottomTab * curvyCoords[i * 6 + 1] * tileRatio) };
-				var p2 = { x: bottomRightEdge.x - (curvyCoords[i * 6 + 2] * tileRatio), y: bottomRightEdge.y - (bottomTab * curvyCoords[i * 6 + 3] * tileRatio) };
-				var p3 = { x: bottomRightEdge.x - (curvyCoords[i * 6 + 4] * tileRatio), y: bottomRightEdge.y - (bottomTab * curvyCoords[i * 6 + 5] * tileRatio) };
+				var p1 = { x: bottomRightEdge.x - (curvyCoords[i * 6 + 0]), y: bottomRightEdge.y - (bottomTab * curvyCoords[i * 6 + 1]) };
+				var p2 = { x: bottomRightEdge.x - (curvyCoords[i * 6 + 2]), y: bottomRightEdge.y - (bottomTab * curvyCoords[i * 6 + 3]) };
+				var p3 = { x: bottomRightEdge.x - (curvyCoords[i * 6 + 4]), y: bottomRightEdge.y - (bottomTab * curvyCoords[i * 6 + 5]) };
 				mask.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
 			}
 			//Left
 			var bottomLeftEdge = { x: bottomRightEdge.x - tileWidth, y: bottomRightEdge.y - 0 };
 			for (var i = 0; i < curvyCoords.length / 6; i++) {
-				var p1 = { x: bottomLeftEdge.x - (-leftTab * curvyCoords[i * 6 + 1] * tileRatio), y: bottomLeftEdge.y - (curvyCoords[i * 6 + 0] * tileRatio) };
-				var p2 = { x: bottomLeftEdge.x - (-leftTab * curvyCoords[i * 6 + 3] * tileRatio), y: bottomLeftEdge.y - (curvyCoords[i * 6 + 2] * tileRatio) };
-				var p3 = { x: bottomLeftEdge.x - (-leftTab * curvyCoords[i * 6 + 5] * tileRatio), y: bottomLeftEdge.y - (curvyCoords[i * 6 + 4] * tileRatio) };
+				var p1 = { x: bottomLeftEdge.x - (-leftTab * curvyCoords[i * 6 + 1]), y: bottomLeftEdge.y - (curvyCoords[i * 6 + 0]) };
+				var p2 = { x: bottomLeftEdge.x - (-leftTab * curvyCoords[i * 6 + 3]), y: bottomLeftEdge.y - (curvyCoords[i * 6 + 2]) };
+				var p3 = { x: bottomLeftEdge.x - (-leftTab * curvyCoords[i * 6 + 5]), y: bottomLeftEdge.y - (curvyCoords[i * 6 + 4]) };
 				mask.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
 			}
 			if (fill) {
@@ -301,14 +311,7 @@
 			return mask;
 		}
 
-		/*
-		graphics.bezierCurveTo(75,37,70,25,50,25);
-		graphics.bezierCurveTo(20,25,20,62.5,20,62.5);
-		graphics.bezierCurveTo(20,80,40,102,75,120);
-		graphics.bezierCurveTo(110,102,130,80,130,62.5);
-		graphics.bezierCurveTo(130,62.5,130,25,100,25);
-		graphics.bezierCurveTo(85,25,75,37,75,40);
-		*/
+
 		function update() {
 		}
 
