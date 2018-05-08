@@ -26,6 +26,12 @@ export default class extends PIXI.Container {
 		this.addChild(buttonSprite);
 		buttonSprite.interactive = true;
 		buttonSprite.on('click', this.onClickTitle.bind(this));
+		buttonSprite.on('touchend', this.onClickTitle.bind(this));
+
+		let text = new PIXI.Text('スタート！', { fontFamily: 'Arial', fontSize: 24, fill: 0xff1010, align: 'center' });
+		text.position.x = 30;
+		text.position.y = 30;
+		buttonSprite.addChild(text);
 	}
 
 	onClickTitle() {

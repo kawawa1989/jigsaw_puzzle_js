@@ -40,6 +40,7 @@ export default class extends PIXI.Container {
 		this.frameContainer = new PIXI.Container();
 		this.addChild(this.frameContainer);
 		this.addChild(this.pieceContainer);
+		this.frameContainer.position.x = 30;
 
 		for (var y = 0; y < pieceDataList.length; ++y) {
 			var row = pieceDataList[y];
@@ -200,18 +201,20 @@ export default class extends PIXI.Container {
 		};
 
 		for (var i = 0; i < this.pieceFrame.length; ++i) {
-			var bw = this.pieceFrame[i].width / 8;
-			var bh = this.pieceFrame[i].height / 8;
+			let f = this.pieceFrame[i];
+			let bw = f.width / 8;
+			let bh = f.height / 8;
+			let pos = f.getGlobalPosition();
 
-			brect.x = this.pieceFrame[i].position.x + (this.pieceFrame[i].width / 2);
-			brect.y = this.pieceFrame[i].position.y + (this.pieceFrame[i].height / 2);
+			brect.x = pos.x + (f.width / 2);
+			brect.y = pos.y + (f.height / 2);
 			brect.width = bw;
 			brect.height = bh;
 			if (isHit(arect, brect)) {
 				if (content.pieceNumber == i) {
 					content.set = true;
-					content.position.x = this.pieceFrame[i].position.x;
-					content.position.y = this.pieceFrame[i].position.y;
+					content.position.x = pos.x;
+					content.position.y = pos.y;
 				}
 			}
 		}

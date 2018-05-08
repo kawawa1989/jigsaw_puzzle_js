@@ -11,12 +11,16 @@ PIXI.utils.sayHello(type);
 
 // 新しいレンダラー作る
 // 720 * 1280
-var renderer = PIXI.autoDetectRenderer(360, 640, { antialias: true, backgroundColor: 0xDDDDDD });
-var h = window.innerHeight / 640;
+var width = 360;
+var height = 640;
+var renderer = PIXI.autoDetectRenderer(width, height, { antialias: true, backgroundColor: 0xDDDDDD });
+var scale = window.innerHeight / height;
 console.log("height:" + window.height + "," + window.innerHeight);
-renderer.view.style.width = (360 * h) + 'px';
-renderer.view.style.height = (640 * h) + 'px';
-
+renderer.view.style.display = "block";
+renderer.view.style.width = (width * scale) + 'px';
+renderer.view.style.height = (height * scale) + 'px';
+renderer.view.style.marginLeft = "auto"
+renderer.view.style.marginRight = "auto"
 
 // それをHTMLファイルに入れる
 document.body.appendChild(renderer.view);
