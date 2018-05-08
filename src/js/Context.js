@@ -3,6 +3,7 @@ import PuzzleScene from './PuzzleScene';
 import PuzzleSelectScene from './PuzzleSelectScene';
 import TitleScene from './TitleScene';
 import SelectDifficultyScene from './SelectDifficultyScene';
+import ResultScene from './ResultScene';
 
 
 export default class {
@@ -13,11 +14,14 @@ export default class {
 		this.SCENE_ID_PUZZLESELECT = 'PuzzleSelectScene';
 		this.SCENE_ID_SELECTDIFFICULTY = 'SelectDifficulty';
 		this.SCENE_ID_PUZZLE = 'PuzzleScene';
+		this.SCENE_ID_RESULT = 'ResultScene';
+
 		this.createSceneFunc = {};
 		this.createSceneFunc[this.SCENE_ID_TITLE] = function () { return new TitleScene() };
 		this.createSceneFunc[this.SCENE_ID_PUZZLESELECT] = function () { return new PuzzleSelectScene() };
 		this.createSceneFunc[this.SCENE_ID_SELECTDIFFICULTY] = function () { return new SelectDifficultyScene() };
 		this.createSceneFunc[this.SCENE_ID_PUZZLE] = function () { return new PuzzleScene() };
+		this.createSceneFunc[this.SCENE_ID_RESULT] = function () { return new ResultScene() };
 
 		this.scene = null;
 		this.sceneId = '';
@@ -58,6 +62,7 @@ export default class {
 				this.scene.onDestroy();
 				this.scene.destroy(true);
 				this.scene = null;
+				PIXI.loader.reset();
 			}
 		}
 		if (this.scene == null) {

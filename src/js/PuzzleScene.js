@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import Button from './modules/Button';
 
 export default class extends PIXI.Container {
 	constructor() {
@@ -17,18 +18,45 @@ export default class extends PIXI.Container {
 	}
 
 	init(context) {
+		this.r = {
+			back: "images/back.png",
+			titlebg: "images/titlebg.jpg",
+			button: "images/button01.png",
+		};
+
 		this.context = context;
+		if (this.context.difficulty == this.context.DIFFICULTY_EASY) {
+			this.pieceXNum = 3;
+			this.pieceYNum = 3;
+		}
+		else if (this.context.difficulty == this.context.DIFFICULTY_NORMAL) {
+			this.pieceXNum = 5;
+			this.pieceYNum = 5;
+		}
+		else if (this.context.difficulty == this.context.DIFFICULTY_HARD) {
+			this.pieceXNum = 7;
+			this.pieceYNum = 7;
+		}
+	}
+
+	onClickBack() {
+		this.context.changeScene(this.context.SCENE_ID_PUZZLESELECT);
 	}
 
 	// 開始処理
 	start() {
 		PIXI.loader
+			.add(this.r.titlebg)
+			.add(this.r.button)
+			.add(this.r.back)
 			.add(this.context.selectPicture)
 			.load(this.loadCompleted.bind(this));
 	}
 
 	// ロード完了時イベント
 	loadCompleted() {
+		let backTexture = PIXI.Texture.fromImage(this.r.back);
+		let bgTexture = PIXI.Texture.fromImage(this.r.titlebg);
 		this.pictureTexture = PIXI.Texture.fromImage(this.context.selectPicture);
 		var pieceDataList = [];
 		for (var y = 0; y < this.pieceYNum; ++y) {
@@ -38,11 +66,18 @@ export default class extends PIXI.Container {
 			}
 			pieceDataList.push(row);
 		}
+		let bgSprite = new PIXI.Sprite(bgTexture);
+		let backButton = new Button(backTexture);
+		backButton.onClick = this.onClickBack.bind(this);
+
 		this.pieceContainer = new PIXI.Container();
 		this.frameContainer = new PIXI.Container();
+		this.addChild(bgSprite);
+		this.addChild(backButton);
 		this.addChild(this.frameContainer);
 		this.addChild(this.pieceContainer);
-		this.frameContainer.position.set(30, 50);
+
+		this.frameContainer.position.set(30, 80);
 
 		for (var y = 0; y < pieceDataList.length; ++y) {
 			var row = pieceDataList[y];
@@ -72,7 +107,7 @@ export default class extends PIXI.Container {
 				}
 
 				var posX = Math.random() * 250;
-				var posY = 300 + (Math.random() * 200);
+				var posY = 350 + (Math.random() * 100);
 				var c = this.createPieceContainer(posX, posY, x, y, piece.top, piece.right, piece.bottom, piece.left);
 				this.pieces.push(c);
 				this.addChild(c);
@@ -116,7 +151,6 @@ export default class extends PIXI.Container {
 		sprite.height = this.pictHeight;
 		sprite.position.x = -1 * column * contentWidth;
 		sprite.position.y = -1 * row * contentWidth;
-
 
 		// ドラッグを開始
 		container.scene = this;
@@ -176,7 +210,7 @@ export default class extends PIXI.Container {
 				return false;
 			}
 		}
-		window.alert("Game Clear!!");
+		this.context.changeScene(this.context.SCENE_ID_RESULT);
 	}
 
 	hitCheck(content) {
@@ -218,6 +252,7 @@ export default class extends PIXI.Container {
 					content.set = true;
 					content.position.x = pos.x;
 					content.position.y = pos.y;
+					this.pieceContainer.setChildIndex(content, 0);
 				}
 			}
 		}
@@ -232,11 +267,9 @@ export default class extends PIXI.Container {
 	}
 
 	update() {
-
 	}
 
 	onDestroy() {
-
 	}
 
 	createPieceMask(topTab, rightTab, bottomTab, leftTab, tileWidth, fill) {

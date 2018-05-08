@@ -47,9 +47,22 @@ export default class extends PIXI.Container {
 		buttonRoot.addChild(hard);
 
 		buttonRoot.position.set(80, 200);
-		easy.position.set(0, 0);
-		normal.position.set(0, 100);
-		hard.position.set(0, 200);
+
+		let buttons = [
+			{ btn: easy, difficulty: this.context.DIFFICULTY_EASY },
+			{ btn: normal, difficulty: this.context.DIFFICULTY_NORMAL },
+			{ btn: hard, difficulty: this.context.DIFFICULTY_HARD },
+		];
+		for (let i = 0; i < buttons.length; ++i) {
+			let button = buttons[i].btn;
+			button.position.set(0, i * 100);
+			button.difficulty = buttons[i].difficulty;
+			button.onClick = function () {
+				this.context.difficulty = this.difficulty;
+				this.context.changeScene(this.context.SCENE_ID_PUZZLE);
+			};
+		}
+
 
 		let titleText = new PIXI.Text('難易度を\n選んでください', { fontFamily: 'Arial', fontSize: 30, fill: 0xFFFFFF, align: 'center' });
 		this.addChild(titleText);
@@ -58,7 +71,6 @@ export default class extends PIXI.Container {
 	}
 
 	onDestroy() {
-		PIXI.loader.reset();
 	}
 
 	onClickBack() {

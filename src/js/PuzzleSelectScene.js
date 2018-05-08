@@ -71,7 +71,6 @@ export default class extends PIXI.Container {
 	}
 
 	onDestroy() {
-		PIXI.loader.reset();
 	}
 	
 	onClickBack() {
