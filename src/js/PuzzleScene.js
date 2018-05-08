@@ -3,6 +3,8 @@ import * as PIXI from 'pixi.js';
 export default class extends PIXI.Container {
 	constructor() {
 		super();
+		this.pictWidth = 300;
+		this.pictHeight = 300;
 		this.draggingObject = null;
 		this.pictureTexture = null;
 		this.pieceFrame = [];
@@ -21,13 +23,13 @@ export default class extends PIXI.Container {
 	// 開始処理
 	start() {
 		PIXI.loader
-			.add("images/picture01.png")
+			.add(this.context.selectPicture)
 			.load(this.loadCompleted.bind(this));
 	}
 
 	// ロード完了時イベント
 	loadCompleted() {
-		this.pictureTexture = PIXI.Texture.fromImage("images/picture01.png");
+		this.pictureTexture = PIXI.Texture.fromImage(this.context.selectPicture);
 		var pieceDataList = [];
 		for (var y = 0; y < this.pieceYNum; ++y) {
 			var row = [];
@@ -40,7 +42,7 @@ export default class extends PIXI.Container {
 		this.frameContainer = new PIXI.Container();
 		this.addChild(this.frameContainer);
 		this.addChild(this.pieceContainer);
-		this.frameContainer.position.x = 30;
+		this.frameContainer.position.set(30, 50);
 
 		for (var y = 0; y < pieceDataList.length; ++y) {
 			var row = pieceDataList[y];
@@ -82,7 +84,7 @@ export default class extends PIXI.Container {
 			var row = pieceDataList[y];
 			for (var x = 0; x < row.length; ++x) {
 				var piece = row[x];
-				var contentWidth = this.pictureTexture.width / this.pieceXNum;
+				var contentWidth = this.pictWidth / this.pieceXNum;
 				var obj = this.createPieceMask(piece.top, piece.right, piece.bottom, piece.left, contentWidth, false);
 				obj.position.x = x * contentWidth;
 				obj.position.y = y * contentWidth;
@@ -94,7 +96,7 @@ export default class extends PIXI.Container {
 	}
 
 	createPieceContainer(x, y, column, row, top, right, bottom, left) {
-		var contentWidth = this.pictureTexture.width / this.pieceXNum;
+		var contentWidth = this.pictWidth / this.pieceXNum;
 		var container = new PIXI.Container();
 		var graphics = this.createPieceMask(top, right, bottom, left, contentWidth, true);
 		var edge = this.createPieceMask(top, right, bottom, left, contentWidth, false);
@@ -102,6 +104,7 @@ export default class extends PIXI.Container {
 		var sprite = new PIXI.Sprite(this.pictureTexture);
 		container.interactive = true;
 		container.width = contentWidth;
+		container.height = contentWidth;
 		container.addChild(sprite);
 		container.addChild(graphics);
 		container.addChild(edge);
@@ -109,24 +112,24 @@ export default class extends PIXI.Container {
 		sprite.mask = graphics;
 		container.position.x = x;
 		container.position.y = y;
-		sprite.width = this.pictureTexture.width;
-		sprite.height = this.pictureTexture.height;
+		sprite.width = this.pictWidth;
+		sprite.height = this.pictHeight;
 		sprite.position.x = -1 * column * contentWidth;
 		sprite.position.y = -1 * row * contentWidth;
 
 
 		// ドラッグを開始
 		container.scene = this;
-		container.on('mousedown', this.onDragStart)
-		container.on('touchstart', this.onDragStart)
+		container.on('mousedown', this.onDragStart);
+		container.on('touchstart', this.onDragStart);
 		// ドロップ（ドラッグを終了）
-		container.on('mouseup', this.onDragEnd)
-		container.on('mouseupoutside', this.onDragEnd)
-		container.on('touchend', this.onDragEnd)
-		container.on('touchendoutside', this.onDragEnd)
+		container.on('mouseup', this.onDragEnd);
+		container.on('mouseupoutside', this.onDragEnd);
+		container.on('touchend', this.onDragEnd);
+		container.on('touchendoutside', this.onDragEnd);
 		// ドラッグ中
-		container.on('mousemove', this.onDragMove)
-		container.on('touchmove', this.onDragMove)
+		container.on('mousemove', this.onDragMove);
+		container.on('touchmove', this.onDragMove);
 		container.pieceNumber = column + (row * this.pieceXNum);
 		container.set = false;
 		return container;
@@ -229,6 +232,10 @@ export default class extends PIXI.Container {
 	}
 
 	update() {
+
+	}
+
+	onDestroy() {
 
 	}
 

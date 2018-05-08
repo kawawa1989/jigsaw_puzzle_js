@@ -9,10 +9,9 @@ if (!PIXI.utils.isWebGLSupported()) {
 PIXI.utils.sayHello(type);
 
 
-// 新しいレンダラー作る
-// 720 * 1280
-var width = 360;
-var height = 640;
+var context = new Context();
+var width = context.screenWidth;
+var height = context.screenHeight;
 var renderer = PIXI.autoDetectRenderer(width, height, { antialias: true, backgroundColor: 0xDDDDDD });
 var scale = window.innerHeight / height;
 console.log("height:" + window.height + "," + window.innerHeight);
@@ -26,7 +25,7 @@ renderer.view.style.marginRight = "auto"
 document.body.appendChild(renderer.view);
 
 
-var context = new Context();
+
 /**
  * animation関数を定義
  */
@@ -38,6 +37,5 @@ var animation = function () {
 		// 描画
 		renderer.render(context.scene);
 	}
-
 };
 animation();

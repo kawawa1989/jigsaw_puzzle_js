@@ -1,5 +1,7 @@
 import * as PIXI from 'pixi.js';
 import Context from './Context';
+import Button from './modules/Button';
+import TextButton from './modules/TextButton';
 
 export default class extends PIXI.Container {
 	constructor() {
@@ -18,24 +20,33 @@ export default class extends PIXI.Container {
 	}
 
 	loadCompleted() {
-		let texture = PIXI.Texture.fromImage("images/titlebg.jpg");
+		let backgroundTexture = PIXI.Texture.fromImage("images/titlebg.jpg");
 		let buttonTexture = PIXI.Texture.fromImage("images/button01.png");
-		let sprite = new PIXI.Sprite(texture);
-		let buttonSprite = new PIXI.Sprite(buttonTexture);
-		this.addChild(sprite);
-		this.addChild(buttonSprite);
-		buttonSprite.interactive = true;
-		buttonSprite.on('click', this.onClickTitle.bind(this));
-		buttonSprite.on('touchend', this.onClickTitle.bind(this));
+		let background = new PIXI.Sprite(backgroundTexture);
+		let startButton = new TextButton(buttonTexture, this.context, "スタート");
+		let titleText = new PIXI.Text('ジグソーパズル', { fontFamily: 'Arial', fontSize: 30, fill: 0xFFFFFF, align: 'center' });
 
-		let text = new PIXI.Text('スタート！', { fontFamily: 'Arial', fontSize: 24, fill: 0xff1010, align: 'center' });
-		text.position.x = 30;
-		text.position.y = 30;
-		buttonSprite.addChild(text);
+
+		this.addChild(background);
+		this.addChild(startButton);
+		this.addChild(titleText);
+		startButton.onClick = this.onClickTitle.bind(this);
+
+
+		this.context.calcCenterPosition(startButton, this);
+		startButton.position.y += 100;
+
+		this.context.calcCenterXPosition(titleText, this);
+		titleText.position.y += 50;
+	}
+
+	onDestroy() {
+		PIXI.loader.reset();
 	}
 
 	onClickTitle() {
-		this.context.changeScene(this.context.SCENE_ID_PUZZLE);
+		console.log("onClickTitle!!");
+		this.context.changeScene(this.context.SCENE_ID_PUZZLESELECT);
 	}
 
 	update() {
