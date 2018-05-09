@@ -4,9 +4,9 @@ import { GameContext } from '../GameContext';
 
 export class TextButton extends Button {
 	public text: PIXI.Text;
-	public context:GameContext; // TODO: Utilityクラスとかにする
+	public context: GameContext; // TODO: Utilityクラスとかにする
 
-	constructor(texture, context, text, fontSize, textColor) {
+	constructor(texture: PIXI.Texture, context: GameContext, text: string, fontSize: number = 30, textColor: number = 0x000000) {
 		super(texture);
 		if (fontSize == undefined) {
 			fontSize = 30;

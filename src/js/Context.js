@@ -4,6 +4,7 @@ import PuzzleSelectScene from './PuzzleSelectScene';
 import TitleScene from './TitleScene';
 import SelectDifficultyScene from './SelectDifficultyScene';
 import ResultScene from './ResultScene';
+import { ENGINE_METHOD_DIGESTS } from 'constants';
 
 
 export default class {

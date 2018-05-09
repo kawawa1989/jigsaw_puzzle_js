@@ -1,43 +1,48 @@
 import * as PIXI from 'pixi.js';
 import { GameContext } from './GameContext';
+import { TextButton } from './modules/TextButton';
+import { SceneBase } from './SceneBase';
+import { SceneID } from './SceneManager';
 
-export namespace JigsawPuzzle {
-	export class TitleScene extends PIXI.Container {
-		public context: GameContext
-		constructor() {
-			super();
-		}
+export class TitleScene extends SceneBase {
+	constructor() {
+		super();
+	}
 
-		init(context: GameContext) {
-			this.context = context;
-		}
+	start(): void {
+		PIXI.loader
+			.add("images/titlebg.jpg")
+			.add("images/button01.png")
+			.load(this.loadCompleted.bind(this));
+	}
 
-		start() {
-			PIXI.loader
-				.add("images/titlebg.jpg")
-				.add("images/button01.png")
-				.load(this.loadCompleted.bind(this));
-		}
+	loadCompleted(): void {
+		let backgroundTexture = PIXI.Texture.fromImage("images/titlebg.jpg");
+		let buttonTexture = PIXI.Texture.fromImage("images/button01.png");
+		let background = new PIXI.Sprite(backgroundTexture);
+		let startButton = new TextButton(buttonTexture, this.context, "スタート");
+		let titleText = new PIXI.Text('ジグソーパズル', { fontFamily: 'Arial', fontSize: 30, fill: 0xFFFFFF, align: 'center' });
 
-		loadCompleted() {
-			let backgroundTexture = PIXI.Texture.fromImage("images/titlebg.jpg");
-			let buttonTexture = PIXI.Texture.fromImage("images/button01.png");
-			let background = new PIXI.Sprite(backgroundTexture);
-			let titleText = new PIXI.Text('ジグソーパズル', { fontFamily: 'Arial', fontSize: 30, fill: 0xFFFFFF, align: 'center' });
+		this.addChild(background);
+		this.addChild(startButton);
+		this.addChild(titleText);
+		startButton.onClick = this.onClickTitle.bind(this);
 
+		this.context.calcCenterPosition(startButton, this);
+		startButton.position.y += 100;
 
-			this.addChild(background);
-			this.addChild(titleText);
-		}
+		this.context.calcCenterXPosition(titleText, this);
+		titleText.position.y += 50;
+	}
 
-		onDestroy() {
-		}
+	onDestroy(): void {
+	}
 
-		onClickTitle() {
-			console.log("onClickTitle!!");
-		}
-		
-		update() {
-		}
+	onClickTitle(): void {
+		this.context.sceneManager.changeScene(SceneID.SelectPuzzle);
+		console.log("onClickTitle!!");
+	}
+
+	update(): void {
 	}
 }

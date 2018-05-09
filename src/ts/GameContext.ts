@@ -1,17 +1,29 @@
 import * as PIXI from 'pixi.js';
-import { JigsawPuzzle } from './TitleScene';
+import { TitleScene } from './TitleScene';
+import { SceneID, SceneManager } from './SceneManager';
+import { SceneBase } from './SceneBase';
+import { Difficulty } from './Difficulty';
+
+
 
 export class GameContext {
 	public screenWidth: number = 360;
 	public screenHeight: number = 640;
-	public scene: PIXI.Container = null;
+	public sceneManager: SceneManager;
+	public selectDifficulty: Difficulty;
+	public selectPictureName: string;
 
 	constructor() {
 		console.log("context created!!");
-		this.scene = new JigsawPuzzle.TitleScene;
+		this.sceneManager = new SceneManager(this);
 	}
 
-	public render(): void {
+	public update(): void {
+		this.sceneManager.update();
+	}
+
+	get container(): PIXI.Container {
+		return this.sceneManager.scene;
 	}
 
 	public calcCenterPosition(content: PIXI.Container, parent: PIXI.Container): void {

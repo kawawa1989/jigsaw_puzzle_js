@@ -1,24 +1,22 @@
 import * as PIXI from 'pixi.js';
-import Context from './Context';
-import Button from './modules/Button';
+import { Button } from './modules/Button';
+import { SceneBase } from './SceneBase';
+import { SceneID } from './SceneManager';
 
-export default class extends PIXI.Container {
+export class  SelectPuzzleScene extends SceneBase {
+	public r: any = {
+		titlebg: "images/titlebg.jpg",
+		back: "images/back.png",
+		pict01: "images/pict01.png",
+		pict02: "images/pict02.png",
+		pict03: "images/pict03.png",
+		pict04: "images/pict04.jpg",
+	};
+
 	constructor() {
 		super();
 	}
-
-	init(context) {
-		this.r = {
-			titlebg: "images/titlebg.jpg",
-			back: "images/back.png",
-			pict01: "images/pict01.png",
-			pict02: "images/pict02.png",
-			pict03: "images/pict03.png",
-			pict04: "images/pict04.jpg",
-		};
-		this.context = context;
-	}
-
+	
 	start() {
 		PIXI.loader
 			.add(this.r.titlebg)
@@ -56,11 +54,10 @@ export default class extends PIXI.Container {
 			spr.height = 128;
 			//spr.scale.set(0.25, 0.25);
 			spr.position.set(data.x, data.y);
-			spr.data = data;
-			spr.onClick = function () {
+			spr.onClick = () => {
 				console.log("picture:" + data.img);
-				self.context.selectPicture = data.img;
-				self.context.changeScene(self.context.SCENE_ID_SELECTDIFFICULTY);
+				self.context.selectPictureName = data.img;
+				self.context.sceneManager.changeScene(SceneID.SelectDifficulty);
 			};
 		}
 		pictRoot.position.set(40, 200);
@@ -77,7 +74,7 @@ export default class extends PIXI.Container {
 
 	onClickBack() {
 		console.log("onClickBack");
-		this.context.changeScene(this.context.SCENE_ID_TITLE);
+		this.context.sceneManager.changeScene(SceneID.Title);
 	}
 
 	update() {

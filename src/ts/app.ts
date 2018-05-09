@@ -31,10 +31,10 @@ document.body.appendChild(renderer.view);
 var animation = function () {
 	// 再帰的に次のアニメーションフレームで animation関数を呼び出す
 	requestAnimationFrame(animation);
-	context.render();
-	if (context.scene != null) {
+	context.update();
+	if (context.container != null) {
 		// 描画
-		renderer.render(context.scene);
+		renderer.render(context.container);
 	}
 };
 animation();
