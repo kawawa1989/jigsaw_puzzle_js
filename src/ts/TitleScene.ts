@@ -5,20 +5,23 @@ import { SceneBase } from './SceneBase';
 import { SceneID } from './SceneManager';
 
 export class TitleScene extends SceneBase {
+	public r: any = {
+		titleBg: "images/titlebg.jpg",
+		button01: "images/button01.png",
+	};
+
 	constructor() {
 		super();
 	}
 
 	start(): void {
-		PIXI.loader
-			.add("images/titlebg.jpg")
-			.add("images/button01.png")
-			.load(this.loadCompleted.bind(this));
+		this.context.sceneManager.loadTextureResources.push(this.r.titleBg);
+		this.context.sceneManager.loadTextureResources.push(this.r.button01);
 	}
 
-	loadCompleted(): void {
-		let backgroundTexture = PIXI.Texture.fromImage("images/titlebg.jpg");
-		let buttonTexture = PIXI.Texture.fromImage("images/button01.png");
+	onLoadCompleted(): void {
+		let backgroundTexture = PIXI.Texture.fromImage(this.r.titleBg);
+		let buttonTexture = PIXI.Texture.fromImage(this.r.button01);
 		let background = new PIXI.Sprite(backgroundTexture);
 		let startButton = new TextButton(buttonTexture, this.context, "スタート");
 		let titleText = new PIXI.Text('ジグソーパズル', { fontFamily: 'Arial', fontSize: 30, fill: 0xFFFFFF, align: 'center' });

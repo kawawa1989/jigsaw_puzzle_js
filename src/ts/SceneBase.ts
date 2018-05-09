@@ -12,6 +12,9 @@ export class SceneBase extends PIXI.Container {
 	update(): void {
 	}
 
+	onLoadCompleted(): void {
+	}
+
 	onDestroy(): void {
 	}
 }

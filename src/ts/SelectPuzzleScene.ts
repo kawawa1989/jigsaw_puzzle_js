@@ -3,7 +3,7 @@ import { Button } from './modules/Button';
 import { SceneBase } from './SceneBase';
 import { SceneID } from './SceneManager';
 
-export class  SelectPuzzleScene extends SceneBase {
+export class SelectPuzzleScene extends SceneBase {
 	public r: any = {
 		titlebg: "images/titlebg.jpg",
 		back: "images/back.png",
@@ -16,19 +16,17 @@ export class  SelectPuzzleScene extends SceneBase {
 	constructor() {
 		super();
 	}
-	
-	start() {
-		PIXI.loader
-			.add(this.r.titlebg)
-			.add(this.r.back)
-			.add(this.r.pict01)
-			.add(this.r.pict02)
-			.add(this.r.pict03)
-			.add(this.r.pict04)
-			.load(this.loadCompleted.bind(this));
+
+	start(): void {
+		this.context.sceneManager.loadTextureResources.push(this.r.titlebg);
+		this.context.sceneManager.loadTextureResources.push(this.r.back);
+		this.context.sceneManager.loadTextureResources.push(this.r.pict01);
+		this.context.sceneManager.loadTextureResources.push(this.r.pict02);
+		this.context.sceneManager.loadTextureResources.push(this.r.pict03);
+		this.context.sceneManager.loadTextureResources.push(this.r.pict04);
 	}
 
-	loadCompleted() {
+	onLoadCompleted(): void {
 		let texture = PIXI.Texture.fromImage(this.r.titlebg);
 		let back = PIXI.Texture.fromImage(this.r.back);
 		let bg = new PIXI.Sprite(texture);
@@ -69,14 +67,14 @@ export class  SelectPuzzleScene extends SceneBase {
 		titleText.position.y += 50;
 	}
 
-	onDestroy() {
+	onDestroy(): void {
 	}
 
-	onClickBack() {
+	onClickBack(): void {
 		console.log("onClickBack");
 		this.context.sceneManager.changeScene(SceneID.Title);
 	}
 
-	update() {
+	update(): void {
 	}
 }

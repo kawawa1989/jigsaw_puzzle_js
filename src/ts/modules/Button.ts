@@ -25,18 +25,18 @@ export class Button extends PIXI.Sprite {
 		this.on('touchendoutside', this.cancel);
 	}
 
-	cancel() {
+	cancel(): void {
 		this.state = 0;
 		this.alpha = 1;
 	}
 
-	touchDown() {
+	touchDown(): void {
 		console.log("touchDown");
 		this.state = 1;
 		this.alpha = 0.5;
 	}
 
-	touchUp() {
+	touchUp(): void {
 		console.log("touchUp");
 		this.alpha = 1;
 		if (this.state == 1) {
